@@ -5,8 +5,9 @@
 #
 # Contains classes for solving the viscous evolution equations.
 ################################################################################
-import numpy as np
+from __future__ import print_function
 
+import numpy as np
 
 class ViscousEvolution(object):
     '''Solves the 1D viscous evoluation equation.
@@ -188,9 +189,9 @@ if __name__ == "__main__":
             n += 1
 
             if (n % 1000) == 0:
-                print 'Nstep: {}'.format(n)
-                print 'Time: {} yr'.format(t/(2*np.pi))
-                print 'dt: {} yr'.format(dt / (2*np.pi))
+                print('Nstep: {}'.format(n))
+                print('Time: {} yr'.format(t/(2*np.pi)))
+                print('dt: {} yr'.format(dt / (2*np.pi)))
 
 
         l, = plt.loglog(grid.Rc, disc.Sigma / AU**2)

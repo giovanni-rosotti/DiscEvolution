@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline as ispline
 from scipy.interpolate import UnivariateSpline as spline
@@ -710,8 +712,8 @@ class Bitsch2015Model(object):
         # First get the header info.
         with open(filename, 'w') as f:
             head = self.header()
-            print >> f, head
-            print >> f, '# time: {}yr'.format(time/(2*np.pi))
+            f.write(head)
+            f.write('# time: {}yr\n'.format(time/(2*np.pi)))
 
             head = '# R M_core M_env t_form'
             if planets.chem:
@@ -720,16 +722,16 @@ class Bitsch2015Model(object):
                     head += ' c{}'.format(k)
                 for k in chem.ice:
                     head += ' e{}'.format(k)
-            print >> f, head
+            f.write(head)
 
             for p in planets:
-                print >> f, p.R, p.M_core, p.M_env, p.t_form/(2*np.pi),
+                f.write("{0} {1} {2} {3} ".format(p.R, p.M_core, p.M_env, p.t_form/(2*np.pi)))
                 if planets.chem:
                     for Xi in p.X_core:
-                        print >> f, Xi,
+                        f.write("{0} ".format(Xi))
                     for Xi in p.X_env:
-                        print >> f, Xi,
-                print >> f
+                        f.write("{0} ".format(Xi))
+                f.write("\n")
                         
 
             
@@ -852,9 +854,9 @@ if __name__ == "__main__":
     for Ri in Rp:
         planet_model.insert_new_planet(0, Ri, planets)
 
-    print planets.R
-    print planets.M_core
-    print planets.M_env
+    print("{}\n".format(planets.R))
+    print("{}\n".format(planets.M_core))
+    print("{}\n".format(planets.M_env))
         
     Rs, Mcs, Mes, = [], [], []
     t = 0

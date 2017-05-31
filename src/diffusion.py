@@ -5,7 +5,10 @@
 #
 # Classes handling diffusion of different species
 ################################################################################
+from __future__ import print_function
+
 import numpy as np
+
 class TracerDiffusion(object):
     '''Diffusion of trace species in a turbulent background.
     args:
@@ -122,12 +125,12 @@ if __name__ == "__main__":
             n += 1
 
             if (n % 1000) == 0:
-                print 'Nstep: {}'.format(n)
-                print 'Time: {} yr'.format(t/(2*np.pi))
-                print 'dt: {} yr'.format(dt / (2*np.pi))
+                print('Nstep: {}\n'.format(n))
+                print('Time: {} yr\n'.format(t/(2*np.pi)))
+                print('dt: {} yr\n'.format(dt / (2*np.pi)))
 
-        print 'Nstep: {}'.format(n)
-        print 'Time: {} yr'.format(t/(2*np.pi))
+        print('Nstep: {}\n'.format(n))
+        print('Time: {} yr\n'.format(t/(2*np.pi)))
         l, = plt.loglog(grid.Rc, Sigma*eps[0])
         l, = plt.loglog(grid.Rc, Sigma*eps[1], l.get_color()+'--')
 

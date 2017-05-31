@@ -6,6 +6,8 @@
 # Combined model for the evolution of gas, dust and chemical species in a
 # viscously evolving disc.
 ################################################################################
+from __future__ import print_function
+
 import numpy as np
 import os
 
@@ -141,7 +143,8 @@ class ChemoDynamicsModel(object):
             head += self._chem.header() + '\n'
 
         with open(filename, 'w') as f:
-            print>>f, head, '# time: {}yr'.format(self.t/(2*np.pi))
+            #print>>f, head, '# time: {}yr'.format(self.t/(2*np.pi))
+            f.write(head+'# time: {}yr\n'.format(self.t/(2*np.pi)))
 
             # Construct the list of variables that we are going to print
             Ncell = self.disc.Ncells
@@ -167,21 +170,21 @@ class ChemoDynamicsModel(object):
             except AttributeError:
                 pass
 
-            print>>f, head
+            f.write(head)
 
             R, Sig, T = self.disc.R, self.disc.Sigma, self.disc.T
             for i in range(Ncell):
-                print>>f, R[i], Sig[i], T[i],
+                f.write("{0} {1} {2} ".format(R[i], Sig[i], T[i]))
                 for j in range(Ndust):
-                    print>>f, self.disc.dust_frac[j,i],
+                    f.write("{} ".format(self.disc.dust_frac[j,i]))
                 for j in range(Ndust):
-                    print>>f, self.disc.grain_size[j,i],
+                    f.write("{} ".format(self.disc.grain_size[j,i]))
                 if chem:
                     for k in chem.gas:
-                        print >> f, chem.gas[k][i],
+                        f.write("{} ".format(chem.gas[k][i]))
                     for k in chem.ice:
-                        print >> f, chem.ice[k][i],
-                print>>f
+                        f.write("{} ".format(chem.ice[k][i]))
+                f.write('\n')
 
 
 class IO_Controller(object):
@@ -334,7 +337,7 @@ if __name__ == "__main__":
 
     with open(os.path.join(DIR, 'model.dat'), 'w') as f:
         for k in model:
-            print >> f, k, model[k]
+            f.write("{0} {1}\n".format(k, model[k]))
     
     # Initialize the disc model
     grid = Grid(R_in, R_out, N_cell, spacing='natural')
@@ -425,9 +428,9 @@ if __name__ == "__main__":
 
             n += 1
             if (n % 1000) == 0:
-                print 'Nstep: {}'.format(n)
-                print 'Time: {} yr'.format(evo.t/(2*np.pi))
-                print 'dt: {} yr'.format(dt / (2*np.pi))
+                print('Nstep: {}\n'.format(n))
+                print('Time: {} yr\n'.format(evo.t/(2*np.pi)))
+                print('dt: {} yr\n'.format(dt / (2*np.pi)))
                 
         if planets and IO.need_injection(evo.t):
             for Ri in injection_radii:
@@ -446,8 +449,8 @@ if __name__ == "__main__":
         if IO.need_print(evo.t):
             err_state = np.seterr(all='warn')
 
-            print 'Nstep: {}'.format(n)
-            print 'Time: {} yr'.format(evo.t/(2*np.pi))
+            print('Nstep: {}\n'.format(n))
+            print('Time: {} yr\n'.format(evo.t/(2*np.pi)))
             plt.subplot(321)
             l, = plt.loglog(grid.Rc, evo.disc.Sigma_G)
             plt.loglog(grid.Rc, evo.disc.Sigma_D.sum(0), l.get_color() + '--')

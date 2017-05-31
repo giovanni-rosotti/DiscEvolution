@@ -6,6 +6,8 @@
 # A simple 1D grid with log or power-law spacings. 
 #
 ################################################################################
+from __future__ import print_function
+
 import numpy as np
 
 class Grid(object):
@@ -149,7 +151,7 @@ class Grid(object):
             else:
                 raise AttributeError("Error: Attribute {} for Grid not "
                                      "known".format(key))
-        print args, kwargs
+        print("{0} {1}\n".format(args, kwargs))
         return Grid(*args, **kwargs)
 
 def from_file(filename):

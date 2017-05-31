@@ -5,6 +5,8 @@
 #
 # Classes extending accretion disc objects to include dust models.
 ################################################################################
+from __future__ import print_function
+
 import numpy as np
 from constants import *
 from disc import AccretionDisc
@@ -383,7 +385,7 @@ class SingleFluidDrift(object):
         cs2   = disc.cs**2
         for a, eps in zip(disc.grain_size, disc.dust_frac):
             if not all((0 <= eps) & ( eps <= 1)):
-                print eps
+                print('{}\n'.format(eps))
             assert(all((0 <= eps) & ( eps <= 1)))        
 
             ts = disc.Stokes(Sigma, a) / Om_k
@@ -603,13 +605,13 @@ if __name__ == "__main__":
             n += 1
 
             if (n % 1000) == 0:
-                print 'Nstep: {}'.format(n)
-                print 'Time: {} yr'.format(t/(2*np.pi))
-                print 'dt: {} yr'.format(dt / (2*np.pi))
+                print('Nstep: {}\n'.format(n))
+                print('Time: {} yr\n'.format(t/(2*np.pi)))
+                print('dt: {} yr\n'.format(dt / (2*np.pi)))
 
 
-        print 'Nstep: {}'.format(n)
-        print 'Time: {} yr'.format(t/(2*np.pi))
+        print('Nstep: {}\n'.format(n))
+        print('Time: {} yr\n'.format(t/(2*np.pi)))
         l, = plt.loglog(grid.Rc, dust.Sigma_D[1])
         plt.loglog(grid.Rc, dust.Sigma_D[0], l.get_color() + '-.')
         
