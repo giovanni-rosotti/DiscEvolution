@@ -151,7 +151,7 @@ class Grid(object):
             else:
                 raise AttributeError("Error: Attribute {} for Grid not "
                                      "known".format(key))
-        print("{0} {1}\n".format(args, kwargs))
+        print("{0} {1}".format(args, kwargs))
         return Grid(*args, **kwargs)
 
 def from_file(filename):

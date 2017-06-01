@@ -854,9 +854,9 @@ if __name__ == "__main__":
     for Ri in Rp:
         planet_model.insert_new_planet(0, Ri, planets)
 
-    print("{}\n".format(planets.R))
-    print("{}\n".format(planets.M_core))
-    print("{}\n".format(planets.M_env))
+    print("{}".format(planets.R))
+    print("{}".format(planets.M_core))
+    print("{}".format(planets.M_env))
         
     Rs, Mcs, Mes, = [], [], []
     t = 0

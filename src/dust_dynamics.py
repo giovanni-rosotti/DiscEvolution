@@ -346,9 +346,9 @@ if __name__ == "__main__":
 
             n += 1
             if (n % 1000) == 0:
-                print('Nstep: {}\n'.format(n))
-                print('Time: {} yr\n'.format(evo.t/(2*np.pi)))
-                print('dt: {} yr\n'.format(dt / (2*np.pi)))
+                print('Nstep: {}'.format(n))
+                print('Time: {} yr'.format(evo.t/(2*np.pi)))
+                print('dt: {} yr'.format(dt / (2*np.pi)))
                 
         if IO.need_save(evo.t) and False:
             evo.dump(os.path.join(DIR, 'disc_{:04d}.dat'.format(IO.nsave)))
@@ -357,8 +357,8 @@ if __name__ == "__main__":
         if IO.need_print(evo.t):
             err_state = np.seterr(all='warn')
 
-            print('Nstep: {}\n'.format(n))
-            print('Time: {} yr\n'.format(evo.t/(2*np.pi)))
+            print('Nstep: {}'.format(n))
+            print('Time: {} yr'.format(evo.t/(2*np.pi)))
             plt.subplot(221)
             l, = plt.loglog(grid.Rc, evo.disc.Sigma_G)
             plt.loglog(grid.Rc, evo.disc.Sigma_D.sum(0), l.get_color() + '--')

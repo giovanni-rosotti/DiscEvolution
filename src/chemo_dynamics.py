@@ -428,9 +428,9 @@ if __name__ == "__main__":
 
             n += 1
             if (n % 1000) == 0:
-                print('Nstep: {}\n'.format(n))
-                print('Time: {} yr\n'.format(evo.t/(2*np.pi)))
-                print('dt: {} yr\n'.format(dt / (2*np.pi)))
+                print('Nstep: {}'.format(n))
+                print('Time: {} yr'.format(evo.t/(2*np.pi)))
+                print('dt: {} yr'.format(dt / (2*np.pi)))
                 
         if planets and IO.need_injection(evo.t):
             for Ri in injection_radii:
@@ -449,8 +449,8 @@ if __name__ == "__main__":
         if IO.need_print(evo.t):
             err_state = np.seterr(all='warn')
 
-            print('Nstep: {}\n'.format(n))
-            print('Time: {} yr\n'.format(evo.t/(2*np.pi)))
+            print('Nstep: {}'.format(n))
+            print('Time: {} yr'.format(evo.t/(2*np.pi)))
             plt.subplot(321)
             l, = plt.loglog(grid.Rc, evo.disc.Sigma_G)
             plt.loglog(grid.Rc, evo.disc.Sigma_D.sum(0), l.get_color() + '--')
