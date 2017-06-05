@@ -27,7 +27,7 @@ class ViscousEvolution(object):
                      'power_law' : Power-law extrapolation
                      'Mdot'      : Constant Mdot, same as inner.
     '''
-    def __init__(self, tol=0.5, boundary='power_law'):
+    def __init__(self, tol=0.5, boundary='power-law'):
         self._tol = tol
         self._bound = boundary
 
