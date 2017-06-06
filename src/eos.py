@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.optimize import newton, brentq
-from constants import GasConst, sig_SB, m_H, AU, Omega0
-import opacity
+from .constants import GasConst, sig_SB, m_H, AU, Omega0
+from .opacity import Zhu2012
 ################################################################################
 # Thermodynamics classes
 ################################################################################
@@ -151,7 +151,7 @@ class IrradiatedEOS(EOS_Table):
         self._accrete = accrete
         self._gamma = gamma
         
-        self._kappa = opacity.Zhu2012
+        self._kappa = Zhu2012
         
         self._T = None
         self._tol = tol
