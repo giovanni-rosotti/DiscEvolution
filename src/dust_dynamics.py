@@ -53,9 +53,16 @@ class DustDynamicsModel(object):
             self._evaporation = evaporation
 
         self._t = t0
-                    
+        
+    def max_timestep(self):
+        dt = 1e300
+        if self._visc:
+            dt = min(dt, self._visc.max_timestep(self._disc))
+        if self._radial_drift:
+            dt = min(dt, self._radial_drift.max_timestep(self._disc))
+        return dt    
             
-    def __call__(self, tmax):
+    def __call__(self, dt):
         '''Evolve the disc for a single timestep
 
         args:
@@ -64,12 +71,6 @@ class DustDynamicsModel(object):
         returns:
             dt : Time step taken
         '''
-        # Compute the maximum time-step
-        dt = tmax - self.t
-        if self._visc:
-            dt = min(dt, self._visc.max_timestep(self._disc))
-        if self._radial_drift:
-            dt = min(dt, self._radial_drift.max_timestep(self._disc))
 
         disc = self._disc
     
@@ -82,14 +83,17 @@ class DustDynamicsModel(object):
                 size = disc.grain_size
             except AttributeError:
                 pass
-            self._visc(dt, disc, [dust, size])
+            mdot, mdotouter = self._visc(dt, disc, [dust, size])
 
         if self._radial_drift:
             self._radial_drift(dt, disc)
             
         # Pin the values to >= 0:
         disc.Sigma[:]     = np.maximum(disc.Sigma, 0)
-        disc.dust_frac[:] = np.maximum(disc.dust_frac, 0)
+        try:
+            disc.dust_frac[:] = np.maximum(disc.dust_frac, 0)
+        except AttributeError:
+            pass
 
         # Apply any photo-evaporation:
         if self._evaporation:
@@ -99,7 +103,7 @@ class DustDynamicsModel(object):
         disc.update(dt)
 
         self._t += dt
-        return dt
+        return mdot,mdotouter
 
     @property
     def disc(self):

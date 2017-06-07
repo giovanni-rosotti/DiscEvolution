@@ -112,7 +112,7 @@ class ViscousEvolution(object):
         mdotouter = -3*self._dS[-1]/self._RXdXe[-1]*2*np.pi*disc.grid.Rc[-1]*disc.grid._dRe[-1]
 
         for t in tracers:
-            if t is None: pass
+            if t is None: continue
             t[:] += dt * self._tracer_fluxes(t) / (Sigma_new + 1e-300)
 
         disc.Sigma[:] = Sigma_new
