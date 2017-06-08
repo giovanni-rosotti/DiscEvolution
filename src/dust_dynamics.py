@@ -11,10 +11,10 @@ from __future__ import print_function
 import numpy as np
 import os
 
-from diffusion import TracerDiffusion
-from dust import SingleFluidDrift
-from ViscousEvolution import ViscousEvolution
-from disc_utils import mkdir_p
+from .diffusion import TracerDiffusion
+from .dust import SingleFluidDrift
+from .ViscousEvolution import ViscousEvolution
+from .disc_utils import mkdir_p
 
 class DustDynamicsModel(object):
     '''
