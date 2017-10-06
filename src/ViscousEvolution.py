@@ -53,7 +53,10 @@ class ViscousEvolution(object):
         if self._bound == 'Zero':
             S[-1] = 0
         elif self._bound == 'power-law':
-            S[-1] = S[-2]**2 / S[-3]
+            if S[-3] !=0:
+                S[-1] = S[-2]**2 / S[-3]
+            else:
+                S[-1] = 0
         elif self._bound == 'Mdot':
             S[-1] = S[-2] * self._X[-2] / self._X[-1]
         else:
