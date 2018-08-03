@@ -192,8 +192,9 @@ class DustGrowthTwoPop(DustyDisc):
         self._a     = np.empty([2, Ncells], dtype='f8')
         self._eps[0] = eps
         self._eps[1] = 0
-        self._a[0]   = 0
+        self._a[0]   = a0
         self._a[1]   = a0
+        self._amin    = a0
 
         self._ice_threshold = thresh
         self._uf = self._frag_velocity(f_ice)
@@ -281,6 +282,10 @@ class DustGrowthTwoPop(DustyDisc):
         # Update the particle distribution
         #   Maximum size due to growth:
         amax = np.minimum(a0, a*np.exp(dt/t_grow))
+        
+        # Do not allow the grain size to become smaller than a0
+        amax = np.maximum(amax, self._amin)
+        
         #   Reduce size due to erosion / fragmentation if grains have grown
         #   above this due to ice condensation
         # amin = a + np.minimum(0, afrag-a)*np.expm1(-dt/t_grow)
@@ -420,14 +425,15 @@ class SingleFluidDrift(object):
         # Compute the fluxes
         flux = Sig*eps * dV_i
 
+
         # Do the update
-        deps = - np.diff(flux*grid.Re) / ((Sigma+1e-300)*grid.dRe2)
+        deps = - np.diff(flux*grid.Re) / ((Sigma+1e-300)*0.5*grid.dRe2)
         if self._diffuse:
             St2 = St_i**2
             Sc = self._diffuse.Sc * (0.5625/(1 + 4*St2) + 0.4375 + 0.25*St2)
 
             deps += self._diffuse(disc, eps_i, Sc)
-
+            
         return deps
 
     def _compute_deltaV(self, disc):
