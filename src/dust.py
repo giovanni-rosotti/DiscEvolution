@@ -192,8 +192,9 @@ class DustGrowthTwoPop(DustyDisc):
         self._a     = np.empty([2, Ncells], dtype='f8')
         self._eps[0] = eps
         self._eps[1] = 0
-        self._a[0]   = 0
+        self._a[0]   = a0
         self._a[1]   = a0
+        self._amin    = a0
 
         self._ice_threshold = thresh
         self._uf = self._frag_velocity(f_ice)
@@ -281,6 +282,10 @@ class DustGrowthTwoPop(DustyDisc):
         # Update the particle distribution
         #   Maximum size due to growth:
         amax = np.minimum(a0, a*np.exp(dt/t_grow))
+        
+        # Do not allow the grain size to become smaller than a0
+        amax = np.maximum(amax, self._amin)
+        
         #   Reduce size due to erosion / fragmentation if grains have grown
         #   above this due to ice condensation
         # amin = a + np.minimum(0, afrag-a)*np.expm1(-dt/t_grow)
@@ -399,28 +404,36 @@ class SingleFluidDrift(object):
         Sigma = disc.Sigma
         grid = disc.grid
 
+        # Add boundary cells
+        shape_v   = eps_i.shape[:-1] + (eps_i.shape[-1]+1,)
+        shape_rho = eps_i.shape[:-1] + (eps_i.shape[-1]+2,)
+
+        dV_i = np.empty(shape_v, dtype='f8')
+        dV_i[...,1:-1] = deltaV_i - self._epsDeltaV
+        dV_i[..., 0] = dV_i[..., 1] 
+        dV_i[...,-1] = dV_i[...,-2] 
+
+        Sig = np.zeros(shape_rho, dtype='f8')
+        eps = np.zeros(shape_rho, dtype='f8')
+        Sig[    1:-1] = Sigma
+        eps[...,1:-1] = eps_i
+        
         # Upwind the density
-        dV_i = deltaV_i - self._epsDeltaV
-        Sig = np.where(dV_i > 0, Sigma[    :-1], Sigma[    1:])
-        eps = np.where(dV_i > 0, eps_i[...,:-1], eps_i[...,1:])
+        Sig = np.where(dV_i > 0, Sig[    :-1], Sig[    1:])
+        eps = np.where(dV_i > 0, eps[...,:-1], eps[...,1:])
         
         # Compute the fluxes
-        shape = eps_i.shape[:-1] + (eps_i.shape[-1]+1,)
-        flux = np.empty(shape, dtype='f8')
-        
-        flux[...,1:-1] = Sig*eps * dV_i
+        flux = Sig*eps * dV_i
 
-        flux[..., 0] = np.minimum(0, flux[..., 1]**2 / (flux[..., 2] + 1e-300))
-        flux[...,-1] = np.maximum(0, flux[...,-2]**2 / (flux[...,-3] + 1e-300))
 
         # Do the update
-        deps = - np.diff(flux*grid.Re) / ((Sigma+1e-300)*grid.dRe2)
+        deps = - np.diff(flux*grid.Re) / ((Sigma+1e-300)*0.5*grid.dRe2)
         if self._diffuse:
             St2 = St_i**2
             Sc = self._diffuse.Sc * (0.5625/(1 + 4*St2) + 0.4375 + 0.25*St2)
 
             deps += self._diffuse(disc, eps_i, Sc)
-
+            
         return deps
 
     def _compute_deltaV(self, disc):
@@ -573,10 +586,10 @@ if __name__ == "__main__":
         Sigma = dust.Sigma
         plt.subplot(211)
         l, = plt.loglog(grid.Rc, dust.Stokes(Sigma)[1])
-        l, = plt.loglog(grid.Rc, dust_ice.Stokes(Sigma)[1], l.get_color()+'--')
+        l, = plt.loglog(grid.Rc, dust_ice.Stokes(Sigma)[1],'--',c=l.get_color())
         plt.subplot(212)
         l, = plt.loglog(grid.Rc, dust.grain_size[1])
-        l, = plt.loglog(grid.Rc, dust_ice.grain_size[1], l.get_color()+'--')
+        l, = plt.loglog(grid.Rc, dust_ice.grain_size[1], '--', c=l.get_color())
 
     plt.subplot(211)
     plt.xlabel('$R\,[\mathrm{au}]$')
@@ -592,7 +605,7 @@ if __name__ == "__main__":
     drift = SingleFluidDrift(settling=settling)
       
     times = np.array([0, 1e2, 1e3, 1e4, 1e5, 1e6, 3e6]) * 2*np.pi
-  
+    
     t = 0
     n = 0
     for ti in times:
@@ -613,7 +626,7 @@ if __name__ == "__main__":
         print('Nstep: {}'.format(n))
         print('Time: {} yr'.format(t/(2*np.pi)))
         l, = plt.loglog(grid.Rc, dust.Sigma_D[1])
-        plt.loglog(grid.Rc, dust.Sigma_D[0], l.get_color() + '-.')
+        plt.loglog(grid.Rc, dust.Sigma_D[0], '-.', c=l.get_color())
         
 
     plt.loglog(grid.Rc, dust.Sigma_G, 'k:')
