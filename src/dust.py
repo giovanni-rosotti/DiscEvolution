@@ -333,6 +333,10 @@ class DustGrowthTwoPop(DustyDisc):
         super(DustGrowthTwoPop, self).update(dt)
         self.do_grain_growth(dt)
 
+    @property
+    def amax(self):
+        return self.grain_size[1]
+
 ################################################################################
 # Radial drift
 ################################################################################
