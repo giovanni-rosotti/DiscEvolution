@@ -20,15 +20,16 @@ class DustDynamicsModel(object):
     '''
     '''
     def __init__(self, disc,
-                 diffusion=False, radial_drift=False, viscous_evo=False,
+                 diffusion=False, radial_drift=False, viscous_evo=True,
                  evaporation=False, settling=False,
                  Sc = 1, t0=0):
 
         self._disc = disc
-
+        
         self._visc = None
         if viscous_evo:
-            bound = 'power-law'
+            #bound = 'power-law'
+            bound = 'Zero'
             # Power law extrapolation fails with zero-density, use simple
             # boundary condition instead
             if evaporation: 
@@ -93,6 +94,8 @@ class DustDynamicsModel(object):
         try:
             disc.dust_frac[:] = np.maximum(disc.dust_frac, 0)
         except AttributeError:
+            pass
+        except TypeError:
             pass
 
         # Apply any photo-evaporation:

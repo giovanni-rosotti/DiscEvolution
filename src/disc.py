@@ -115,6 +115,14 @@ class AccretionDisc(object):
     def Omega_k(self):
         return self._star.Omega_k(self.R)
 
+    @property
+    def dust_frac(self):
+        return 0
+
+    @property
+    def amax(self):
+        return 0
+
     def set_surface_density(self, Sigma):
         self._Sigma[:] = Sigma
 
