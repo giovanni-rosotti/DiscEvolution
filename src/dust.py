@@ -381,6 +381,7 @@ class SingleFluidDrift(object):
         step = np.inf
         
         dV = abs(self._compute_deltaV(disc))
+        dV[dV==0]=np.finfo(float).tiny
         return 0.5 * (disc.grid.dRc / dV).min()
 
 
