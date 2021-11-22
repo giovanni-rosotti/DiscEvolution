@@ -133,9 +133,21 @@ class LBP_Solution(object):
 
     args:
         M     : Disc mass
-        rc    : Critical radius at t=0
-        n_c   : viscosity at rc
-        gamma : radial dependence of nu, default=1
+        rc    : Critical radius at t = 0
+        n_c   : viscosity evaluated at R = rc
+        gamma : radial dependence of nu, default = 1 (viscosity power law index)
+        
+    tc : Viscous timescale, commonly known as t_{\nu}
+    Sigma0 : Constant factor in the gas surface density
+    
+    __call__, args:
+    
+    	tt : commonly known as T (capital t)
+    	X : radius normalized over Rc
+    	Xg : (R/Rc)^{-gamma}
+    	ft : commonly known as T^{-\eta}
+    	
+    	Computes the surface density at a given time and radius
     '''
     def __init__(self, M, rc, nuc, gamma=1):
         self._rc  = rc
