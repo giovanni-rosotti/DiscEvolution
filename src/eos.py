@@ -10,6 +10,22 @@ class EOS_Table(object):
     
     Stores pre-computed temperatures, viscosities etc. Derived classes need to
     provide the funcitons called by set_grid.
+    
+	__init__
+		Parameters:
+	
+		gamma : power-law index of viscosity as a function of the radius
+		mu : mean molecular weight    
+		
+	set_arrays
+		Initialises the parameters (arrays). All of these quantities are functions of the radius.
+		Parameters:
+		
+		R : array of radii
+		cs : array of sound speeds
+		H : array of heights
+		nu : array of viscosity
+		alpha : array of Shakura&Sunyaev (1973) alpha 
     '''
     def __init__(self):
         self._gamma = 1.0
@@ -63,25 +79,40 @@ class EOS_Table(object):
 class LocallyIsothermalEOS(EOS_Table):
     '''Simple locally isothermal power law equation of state:
 
-    args:
-        cs0     : sound-speed at 1AU
-        q       : power-law index of sound-speed
-        alpha_t : turbulent alpha parameter
-        star    : stellar properties
-        mu      : mean molecular weight, default=2.4
-    '''
-    def __init__(self, star, cs0, q, alpha_t, mu=2.4):
-        super(LocallyIsothermalEOS, self).__init__()
+    	args:
+    		star    : stellar properties
+        	cs0     : sound speed at 1 AU
+        	beta 	: power-law index of the aspect ratio H/R as a function of the stellar mass
+        	q       : power-law index of sound speed as a function of radius
+        	alpha_t : turbulent (_t) alpha parameter (Shakura & Sunyaev, 1973)
+        	mu      : mean molecular weight, default = 2.4
+        	
+        f_cs :
+        	Evaluates the sound speed at radius R, using the power-law prescription cs \propto R^{q}.
+        	
+        f_H :
+        	Evaluates the disc thickness at radius R. Using the power-law prescription H \propto R^{3/2 + q}.
+        	
+        f_nu :
+        	Evaluates the disc viscosity at radius R, using the alpha prescription (Shakura & Sunyaev 1973) \nu (R) = \alpha (R) cs (R) H (R)
         
+        
+
+	'''
+    def __init__(self, star, cs0, beta, q, alpha_t, mu=2.4):
+        super(LocallyIsothermalEOS, self).__init__()
+
         self._cs0 = cs0
         self._q = q
         self._alpha_t = alpha_t
-        self._H0 = cs0 * star.M**-0.5
+        self._H0 = cs0 * star.M**(beta)
         self._T0 = (AU*Omega0)**2 * mu / GasConst
         self._mu = mu
         
-    def _f_cs(self, R):
+        
+    def _f_cs(self, star, R):							
         return self._cs0 * R**self._q
+
 
     def _f_H(self, R):
         return self._H0 * R**(1.5+self._q)

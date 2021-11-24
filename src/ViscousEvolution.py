@@ -127,16 +127,7 @@ class ViscousEvolution(object):
 
 
 class LBP_Solution(object):
-    '''Analytical solution for the evolution of an accretion disc,
     
-    Lynden-Bell & Pringle, (1974).
-
-    args:
-        M     : Disc mass
-        rc    : Critical radius at t=0
-        n_c   : viscosity at rc
-        gamma : radial dependence of nu, default=1
-    '''
     def __init__(self, M, rc, nuc, gamma=1):
         self._rc  = rc
         self._nuc = nuc
@@ -145,12 +136,33 @@ class LBP_Solution(object):
         self._Sigma0 = M * (2-gamma) / (2 * np.pi * rc**2)
         self._gamma = gamma
         
+    '''
+    Analytical solution for the evolution of an accretion disc,
+    
+    Lynden-Bell & Pringle, (1974).
+
+    args:
+        M     : Disc mass
+        rc    : Critical radius at t = 0
+        n_c   : viscosity evaluated at R = rc
+        gamma : radial dependence of nu, default = 1 (viscosity power law index)
+        
+    _tc : Viscous timescale, commonly known as t_{\nu}
+    _Sigma0 : Constant factor in the gas surface density
+    
+    __call__, computes the surface density at given time and radius.
+    args:
+    
+    	R	  : cylindrical radius
+    	t 	  : time
+    '''
+        
+        
     def __call__(self, R, t):
-        '''Surface density at R and t'''
-        tt = t / self._tc + 1
-        X = R/self._rc
-        Xg = X**- self._gamma
-        ft = tt ** ((-2.5 + self._gamma)/(2-self._gamma))
+        tt = t / self._tc + 1                                 # tt : commonly known as T (capital t)
+        X = R/self._rc									      # X : radius normalized over Rc
+        Xg = X**- self._gamma							      # Xg : (R/Rc)^{-gamma}
+        ft = tt ** ((-2.5 + self._gamma)/(2-self._gamma))     # ft : commonly known as T^{-\eta}
         
         return self._Sigma0 * ft * Xg * np.exp( - Xg*X*X / tt)
         
