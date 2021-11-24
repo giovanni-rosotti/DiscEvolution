@@ -147,8 +147,8 @@ class LBP_Solution(object):
         n_c   : viscosity evaluated at R = rc
         gamma : radial dependence of nu, default = 1 (viscosity power law index)
         
-    t_c : Viscous timescale, commonly known as t_{\nu}
-    Sigma_0 : Constant factor in the gas surface density
+    _tc : Viscous timescale, commonly known as t_{\nu}
+    _Sigma0 : Constant factor in the gas surface density
     
     __call__, computes the surface density at given time and radius.
     args:
