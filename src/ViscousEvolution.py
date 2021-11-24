@@ -127,7 +127,17 @@ class ViscousEvolution(object):
 
 
 class LBP_Solution(object):
-    '''Analytical solution for the evolution of an accretion disc,
+    
+    def __init__(self, M, rc, nuc, gamma=1):
+        self._rc  = rc
+        self._nuc = nuc
+        self._tc  = rc*rc / (3*(2-gamma)**2 * nuc)
+
+        self._Sigma0 = M * (2-gamma) / (2 * np.pi * rc**2)
+        self._gamma = gamma
+        
+    '''
+    Analytical solution for the evolution of an accretion disc,
     
     Lynden-Bell & Pringle, (1974).
 
@@ -137,32 +147,22 @@ class LBP_Solution(object):
         n_c   : viscosity evaluated at R = rc
         gamma : radial dependence of nu, default = 1 (viscosity power law index)
         
-    tc : Viscous timescale, commonly known as t_{\nu}
-    Sigma0 : Constant factor in the gas surface density
+    t_c : Viscous timescale, commonly known as t_{\nu}
+    Sigma_0 : Constant factor in the gas surface density
     
-    __call__, args:
+    __call__, computes the surface density at given time and radius.
+    args:
     
-    	tt : commonly known as T (capital t)
-    	X : radius normalized over Rc
-    	Xg : (R/Rc)^{-gamma}
-    	ft : commonly known as T^{-\eta}
-    	
-    	Computes the surface density at a given time and radius
+    	R	  : cylindrical radius
+    	t 	  : time
     '''
-    def __init__(self, M, rc, nuc, gamma=1):
-        self._rc  = rc
-        self._nuc = nuc
-        self._tc  = rc*rc / (3*(2-gamma)**2 * nuc)
-
-        self._Sigma0 = M * (2-gamma) / (2 * np.pi * rc**2)
-        self._gamma = gamma
+        
         
     def __call__(self, R, t):
-        '''Surface density at R and t'''
-        tt = t / self._tc + 1
-        X = R/self._rc
-        Xg = X**- self._gamma
-        ft = tt ** ((-2.5 + self._gamma)/(2-self._gamma))
+        tt = t / self._tc + 1                                 # tt : commonly known as T (capital t)
+        X = R/self._rc									      # X : radius normalized over Rc
+        Xg = X**- self._gamma							      # Xg : (R/Rc)^{-gamma}
+        ft = tt ** ((-2.5 + self._gamma)/(2-self._gamma))     # ft : commonly known as T^{-\eta}
         
         return self._Sigma0 * ft * Xg * np.exp( - Xg*X*X / tt)
         

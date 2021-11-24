@@ -40,7 +40,7 @@ class DustyDisc(AccretionDisc):
         if Sigma is None:
             Sigma = self.Sigma_G
             
-        return self._Kdrag * size / (Sigma + 1e-20)
+        return self._Kdrag * size / (Sigma + tiny)
 
     def mass(self):
         '''Grain mass'''
@@ -242,7 +242,7 @@ class DustGrowthTwoPop(DustyDisc):
         gamma[1:-1] = abs((P[2:] - P[:-2])/(R[2:] - R[:-2]))
         gamma[ 0]   = abs((P[ 1] - P[  0])/(R[ 1] - R[ 0]))
         gamma[-1]   = abs((P[-1] - P[ -2])/(R[-1] - R[-2]))
-        gamma *= R/(P+1e-20)
+        gamma *= R/(P+tiny)
 
         return gamma
         
@@ -255,11 +255,11 @@ class DustGrowthTwoPop(DustyDisc):
             
         # Radial drift time-scale limit
         h = self.H / self.R
-        ad = self._fdrift * (Sigma_D/self._rho_s) / (gamma * h**2+1e-20)
+        ad = self._fdrift * (Sigma_D/self._rho_s) / (gamma * h**2+tiny)
 
         # Radial drift-driven fragmentation:
         cs = self.cs
-        St_d = 2 * (self._uf/cs) / (gamma*h + 1e-20)
+        St_d = 2 * (self._uf/cs) / (gamma*h + tiny)
         af = St_d * (2/np.pi) * (Sigma_G / self._rho_s)
 
         return ad, af
@@ -309,7 +309,7 @@ class DustGrowthTwoPop(DustyDisc):
         '''Update the grain size due to a change in bulk ice abundance'''
         eps_new = grains.total_abund
             
-        #f = eps_new / (self.integ_dust_frac + 1e-20)
+        #f = eps_new / (self.integ_dust_frac + tiny)
         #self._a[1] = np.maximum(self._a0, self._a[1]*f**(1/3.))
 
         self._eps[0] = eps_new*(1-self._fm)
@@ -320,7 +320,7 @@ class DustGrowthTwoPop(DustyDisc):
         for spec in grains:
             if 'grain' not in spec:
                 f_ice += grains[spec]
-        f_ice /= (eps_new + 1e-20)
+        f_ice /= (eps_new + tiny)
 
         self._uf = self._frag_velocity(f_ice)
 
@@ -434,7 +434,7 @@ class SingleFluidDrift(object):
 
 
         # Do the update
-        deps = - np.diff(flux*grid.Re) / ((Sigma+1e-20)*0.5*grid.dRe2)
+        deps = - np.diff(flux*grid.Re) / ((Sigma+tiny)*0.5*grid.dRe2)
         if self._diffuse:
             St2 = St_i**2
             Sc = self._diffuse.Sc * (0.5625/(1 + 4*St2) + 0.4375 + 0.25*St2)
@@ -453,7 +453,7 @@ class SingleFluidDrift(object):
 
         # Average to cell edges:        
         Om_kav  = 0.5*(Om_k      [1:] + Om_k      [:-1])
-        Sig_av  = 0.5*(Sigma     [1:] + Sigma     [:-1]) + 1e-20
+        Sig_av  = 0.5*(Sigma     [1:] + Sigma     [:-1]) + tiny
         SigD_av = 0.5*(SigmaD[...,1:] + SigmaD[...,:-1])
         a_av    = 0.5*(a    [..., 1:] + a     [...,:-1])
 
@@ -466,7 +466,7 @@ class SingleFluidDrift(object):
         if disc.feedback:
             # By default, use the surface density
             eps_av = SigD_av / Sig_av
-            eps_g = np.maximum(1 - eps_av.sum(0), 1e-20)
+            eps_g = np.maximum(1 - eps_av.sum(0), tiny)
                 
             SigG_av = Sig_av * eps_g
 
@@ -476,13 +476,13 @@ class SingleFluidDrift(object):
                 rhoG = disc.midplane_gas_density
                 rhoD_av = 0.5 * (rhoD[...,1:] + rhoD[...,:-1])
                 rhoG_av = 0.5 * (rhoG    [1:] + rhoG    [:-1])
-                rho_av = rhoD_av.sum(0) + rhoG_av + 1e-20
+                rho_av = rhoD_av.sum(0) + rhoG_av + tiny
 
                 eps_av = rhoD_av / rho_av
-                eps_g  = np.maximum(rhoG_av / rho_av, 1e-20)
+                eps_g  = np.maximum(rhoG_av / rho_av, tiny)
                 
         # Compute the Stokes number        
-        St_av = disc.Stokes(SigG_av, a_av+1e-20)
+        St_av = disc.Stokes(SigG_av, a_av+tiny)
 
         # Compute the lambda factors
         #   Use lambda * eps_g instead of lambda to avoid 0/0 when eps_g -> 0.
@@ -496,7 +496,7 @@ class SingleFluidDrift(object):
         # Compute the gas velocities:
         rho = disc.midplane_gas_density
         dPdr = np.diff(disc.P) / disc.grid.dRc
-        eta = - dPdr / (0.5*(rho[1:] + rho[:-1] + 1e-20)*Om_kav)
+        eta = - dPdr / (0.5*(rho[1:] + rho[:-1] + tiny)*Om_kav)
 
         D_1 = eps_g / ((eps_g + la0)**2 + la1**2)
         u_gas =                la1  * eta * D_1
@@ -542,7 +542,7 @@ class SingleFluidDrift(object):
             
             eps_k[:] += dt*self._fluxes(disc, eps_k, dV_k, St_k)
 
-            a_k[:] = eps_a / (eps_k + 1e-20)
+            a_k[:] = eps_a / (eps_k + tiny)
 
         if dust_tracers is not None:
             dust_tracers[:] += d_tr

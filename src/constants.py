@@ -1,6 +1,8 @@
 """
 Useful constants
 
+	tiny : standard small number to avoid division by zero
+
 	G: Gravitational constant G - set to 1
 	Omega0 : Keplerian angular velocity with M = Msun and R = 1 AU [s^(-1)]
 	Msun: Solar mass in cgs [g]
@@ -16,6 +18,7 @@ Useful constants
 	GasConst : = k_B/m_H [cm^2/(K s^2)]
 """
 
+tiny = 1e-100
 
 G = 1.
 Omega0 = 1.99102e-7

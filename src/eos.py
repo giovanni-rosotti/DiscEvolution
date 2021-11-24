@@ -82,7 +82,7 @@ class LocallyIsothermalEOS(EOS_Table):
     	args:
     		star    : stellar properties
         	cs0     : sound speed at 1 AU
-        	beta 	: power-law index of the aspect ratio H/R as a function of radius
+        	beta 	: power-law index of the aspect ratio H/R as a function of the stellar mass
         	q       : power-law index of sound speed as a function of radius
         	alpha_t : turbulent (_t) alpha parameter (Shakura & Sunyaev, 1973)
         	mu      : mean molecular weight, default = 2.4
