@@ -123,6 +123,14 @@ class AccretionDisc(object):
     def amax(self):
         return 0
 
+    def discmass(self):
+        """
+        Compute the disc mass in Msun. See the documentation for details on the 1.5e33**2/2e33 factor.
+        """
+        mass_tmp = 2. * np.pi*np.trapz(self.R*self.Sigma_G, self.R)
+        mass = mass_tmp*(1.5e13)**2/2e33
+        return mass
+
     def set_surface_density(self, Sigma):
         self._Sigma[:] = Sigma
 

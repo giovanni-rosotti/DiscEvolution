@@ -166,6 +166,33 @@ class LBP_Solution(object):
         
         return self._Sigma0 * ft * Xg * np.exp( - Xg*X*X / tt)
         
+#########################
+
+class PL_sigma(object):
+    """
+    Simple power-law solution. Based on Lynden-Bell & Pringle (1974), without the exponential cutoff.
+    """
+    
+    def __init__(self, M, rc, nuc, gamma=1):
+        self._rc  = rc
+        self._nuc = nuc
+        self._tc  = rc*rc / (3*(2-gamma)**2 * nuc)
+
+        self._Sigma0 = M * (2-gamma) / (2 * np.pi * rc**2)
+        self._gamma = gamma
+        
+        
+    def __call__(self, R, t=0):
+        X = R/self._rc									      # X : radius normalized over Rc
+        Xg = X**- self._gamma							      # Xg : (R/Rc)^{-gamma}
+
+        return self._Sigma0 * Xg
+        
+
+#####################################
+
+
+
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
     from disc import AccretionDisc
