@@ -170,7 +170,7 @@ class LBP_Solution(object):
 
 class PL_sigma(object):
     """
-    Simple power-law solution. Dased on Lynden-Bell & Pringle (1974), without the exponential cutoff.
+    Simple power-law solution. Based on Lynden-Bell & Pringle (1974), without the exponential cutoff.
     """
     
     def __init__(self, M, rc, nuc, gamma=1):
@@ -182,13 +182,11 @@ class PL_sigma(object):
         self._gamma = gamma
         
         
-    def __call__(self, R, t):
-        tt = t / self._tc + 1                                 # tt : commonly known as T (capital t)
+    def __call__(self, R, t=0):
         X = R/self._rc									      # X : radius normalized over Rc
         Xg = X**- self._gamma							      # Xg : (R/Rc)^{-gamma}
-        ft = tt ** ((-2.5 + self._gamma)/(2-self._gamma))     # ft : commonly known as T^{-\eta}
-        
-        return self._Sigma0 * ft * Xg
+
+        return self._Sigma0 * Xg
         
 
 #####################################

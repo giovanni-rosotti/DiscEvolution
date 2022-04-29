@@ -109,7 +109,6 @@ class LocallyIsothermalEOS(EOS_Table):
         self._T0 = (AU*Omega0)**2 * mu / GasConst
         self._mu = mu
         
-        
     def _f_cs(self, star, R):							
         return self._cs0 * R**self._q
 
