@@ -12,16 +12,33 @@ import numpy as np
 import os
 
 from .diffusion import TracerDiffusion
-from .dust import SingleFluidDrift
+from .dust import SingleFluidDrift, Advection
 from .ViscousEvolution import ViscousEvolution
 from .disc_utils import mkdir_p
+from .mhd_massloss import MHD_massloss
+
 
 class DustDynamicsModel(object):
-    '''
-    '''
+    """
+    Includes dust dynamics, MHD disc winds (Tabone et al. 2021).
+
+    args:
+        diffusion       : whether to include diffusion (default = False)
+        radial_drift    : whether to include radial drift (default = False)
+        viscous_evo     : whether to include viscous evolution (default = True)
+        evaporation     : whether to include photoevaporation (default = False)
+        setling         : whether to include dust settling (default = False)
+        advection       : whether to include MHD advection (default = True)
+        mhd_massloss    : whether to include MHD mass loss (default = True)
+        alpha_DW        : alpha disc wind parameter (Tabone et al. 2021)
+        leverarm        : magnetic leverarm parameter (Tabone et al. 2021)
+        xi              : xi parameter (Tabone et al. 2021)
+        Sc              :
+        t0              : initial time
+    """
     def __init__(self, disc,
                  diffusion=False, radial_drift=False, viscous_evo=True,
-                 evaporation=False, settling=False,
+                 evaporation=False, settling=False, advection=True, mhd_massloss = True, alpha_DW = 1e-3, leverarm = 3, xi = 1,
                  Sc = 1, t0=0):
 
         self._disc = disc
@@ -53,6 +70,14 @@ class DustDynamicsModel(object):
         if evaporation:
             self._evaporation = evaporation
 
+        self._advection = False
+        if advection:
+            self._advection = Advection()
+
+        self._mhd_massloss = False
+        if mhd_massloss:
+            self._mhd_massloss = MHD_massloss(alpha_DW, leverarm, xi)
+
         self._t = t0
         
     def max_timestep(self):
@@ -61,17 +86,20 @@ class DustDynamicsModel(object):
             dt = min(dt, self._visc.max_timestep(self._disc))
         if self._radial_drift:
             dt = min(dt, self._radial_drift.max_timestep(self._disc))
+        if self._advection:
+            dt = min(dt, self._advection.max_timestep(self._disc))
         return dt    
             
     def __call__(self, dt):
-        '''Evolve the disc for a single timestep
+        """
+        Evolve the disc for a single timestep
 
         args:
-            dtmax : Upper limit to time-step
+            dtmax   : Upper limit to time-step
 
         returns:
-            dt : Time step taken
-        '''
+            dt      : Time step taken
+        """
 
         disc = self._disc
     
@@ -85,6 +113,9 @@ class DustDynamicsModel(object):
             except AttributeError:
                 pass
             mdot, mdotouter = self._visc(dt, disc, [dust, size])
+        else:
+            mdot = 0
+            mdotouter = 0
 
         if self._radial_drift:
             self._radial_drift(dt, disc)
@@ -101,6 +132,16 @@ class DustDynamicsModel(object):
         # Apply any photo-evaporation:
         if self._evaporation:
             self._evaporation(disc, dt)
+
+        # MHD advection:
+        if self._advection:
+            mdot_wind, mdotouter_wind = self._advection(disc, dt)
+
+            mdot += mdot_wind
+            mdotouter += mdotouter_wind
+
+        if self._mhd_massloss:
+            self._mhd_massloss(disc, dt)
 
         # Now we should update the auxillary properties, do grain growth etc
         disc.update(dt)
@@ -126,6 +167,8 @@ class DustDynamicsModel(object):
             head += self._visc.header() + '\n'
         if self._radial_drift:
             head += self._radial_drift.header() + '\n'
+        if self._advection:
+            head += self._advection.header() + '\n'
         if self._diffusion:
             head += self._diffusion.header() + '\n'
         try:
@@ -175,6 +218,7 @@ class DustDynamicsModel(object):
                     for k in chem.ice:
                         f.write("{0} ".format(chem.ice[k][i]))
                 f.write("\n")
+
 
 
 class IO_Controller(object):
@@ -243,6 +287,8 @@ class IO_Controller(object):
     def finished(self):
         return not (self._tprint or self._tsave or self._tinject)
         
+
+
 if __name__ == "__main__":
     import sys
     import matplotlib.pyplot as plt

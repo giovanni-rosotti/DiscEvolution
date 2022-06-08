@@ -547,6 +547,107 @@ class SingleFluidDrift(object):
         if dust_tracers is not None:
             dust_tracers[:] += d_tr
 
+
+class Advection(object):
+    """
+    Solution of the advection equation in the case of MHD disc winds
+
+    args:
+        
+        advection   : whether to solve the advection equation, default = False
+        alpha_DW    : alpha disc wind parameter (Tabone et al. 2021)
+    """
+
+    def __init__(self, advection=True, alpha_DW = 1e-3):
+
+        self._advection = advection
+        self._alpha_DW = alpha_DW
+
+    def header(self):
+        '''Radial drift header'''
+        head = ''
+        if self._advection:
+            head += self._advection.header() + '\n'
+        head += ('# {} diffusion: {} settling: {}'
+                 ''.format(self.__class__.__name__,
+                           self._advection is not None))
+        return head
+        
+    def max_timestep(self, disc):
+    
+        dV = abs(self._compute_v_DW(disc))
+        dV[dV==0]=np.finfo(float).tiny
+        dV = dV[    1:-1]
+        return 0.1 * (disc.grid.dRc / dV).min()
+    
+    def _fluxes(self, disc, v_DW):
+        """
+        Update a quantity that moves with velocity v_DW (DW = disc wind)
+        """
+
+        Sigma = disc.Sigma
+        grid = disc._grid
+
+        R = grid.Re
+        dR2 = grid.dRe2
+    
+        Sigma_fake = np.r_[Sigma[0], Sigma, Sigma[-1]]
+        
+        # Upwind the density
+        Sigma = np.where(v_DW > 0, Sigma_fake[    :-1], Sigma_fake[    1:])
+        
+        # Compute the fluxes
+        flux = Sigma* R*v_DW                      # Flux = transported quantity (R*Sigma) times the involved velocity (v_DW)
+        
+        flux[0] = flux[1]
+        flux[-1] = flux[-2]
+
+        # Do the update
+        deps = - np.diff(flux)/ (0.5*dR2)          # Flux times the surface over volume, which is 2/(*Delta(R^2)). The minus is because diff would subtract i+1/2 - i-1/2, but the algorithm requires the opposite.
+            
+        return deps
+
+
+    def _compute_v_DW(self, disc):
+        """
+        Compute the MHD advection velocity (v disc wind)
+        """
+
+        grid = disc._grid
+
+        H = disc._eos._f_H(grid.Re)                                  # Scale height of the disc evaluated at the cell interfaces (because this will be used to determine a velocity)
+        cs = disc._eos._f_cs(grid.Re)                                # Sound speed in the disc evaluated at the cell interfaces ("")
+
+        HoverR = H/grid.Re                                          # Aspect ratio of the disc evaluated at the cell interfaces ("")
+
+       # Disc wind velocity (the minus is because it's towards the star):
+        v_DW = - 3./2. * self._alpha_DW * HoverR * cs
+
+        return v_DW
+
+
+    def __call__(self, disc, dt, gas_tracers=None, dust_tracers=None):
+        """
+        Apply the update for advection over time-step dt
+        """
+
+        grid = disc._grid
+
+        # Compute the disc wind advection velocity (Tabone et al. 2021)
+        v_DW = self._compute_v_DW(disc)
+
+        f = self._fluxes(disc, v_DW)
+
+        Sigma_new = disc.Sigma + dt * f
+
+        disc.Sigma[:] = Sigma_new
+
+        mdot = f[0]*2*np.pi
+        mdotouter = f[-1]*2*np.pi
+        
+        return mdot, mdotouter
+
+
     
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
