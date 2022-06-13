@@ -29,7 +29,7 @@ class MHD_massloss():
         self._xi = xi
 
     def Sigmadot(self, grid, disc, sigma):
-        sigmadot = (3*self._alpha_DW*sigma*disc._eos._f_cs(grid.Rc)**2)/(4*(self._leverarm-1)*grid.Rc**2*disc.new_Omega_k(grid.Rc))
+        sigmadot = (3*self._alpha_DW*sigma*disc._eos._f_cs(grid.Rc)**2)/(4*(self._leverarm-1)*grid.Rc**2*disc.Omega_k)
         return sigmadot
 
     def __call__(self, disc, dt):
