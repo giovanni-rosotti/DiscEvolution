@@ -3,7 +3,7 @@
 # Author: R. Booth
 # Date: 24 - Feb - 2017
 #
-# Models for photo-evaporation of a disc
+# Models for external photo-evaporation of a disc
 ###############################################################################
 import numpy as np
 from constants import AU, Msun

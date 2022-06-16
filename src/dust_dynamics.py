@@ -16,6 +16,7 @@ from .dust import SingleFluidDrift, Advection
 from .ViscousEvolution import ViscousEvolution
 from .disc_utils import mkdir_p
 from .mhd_massloss import MHD_massloss
+from .internal_photoev import internal_photoev
 
 
 class DustDynamicsModel(object):
@@ -23,23 +24,24 @@ class DustDynamicsModel(object):
     Includes dust dynamics, MHD disc winds (Tabone et al. 2021).
 
     args:
-        diffusion       : whether to include diffusion (default = False)
-        radial_drift    : whether to include radial drift (default = False)
-        viscous_evo     : whether to include viscous evolution (default = True)
-        evaporation     : whether to include photoevaporation (default = False)
-        setling         : whether to include dust settling (default = False)
-        advection       : whether to include MHD advection (default = True)
-        mhd_massloss    : whether to include MHD mass loss (default = True)
-        alpha_DW        : alpha disc wind parameter (Tabone et al. 2021)
-        leverarm        : magnetic leverarm parameter (Tabone et al. 2021)
-        xi              : xi parameter (Tabone et al. 2021)
-        Sc              :
-        t0              : initial time
+        diffusion           : whether to include diffusion (default = False)
+        radial_drift        : whether to include radial drift (default = False)
+        viscous_evo         : whether to include viscous evolution (default = True)
+        int_photoevaporation: whether to include internal photoevaporation (default = False)
+        ext_photoevaporation: whether to include external photoevaporation (default = False)
+        setling             : whether to include dust settling (default = False)
+        advection           : whether to include MHD advection (default = True)
+        mhd_massloss        : whether to include MHD mass loss (default = True)
+        alpha_DW            : alpha disc wind parameter (Tabone et al. 2021)
+        leverarm            : magnetic leverarm parameter (Tabone et al. 2021)
+        xi                  : xi parameter (Tabone et al. 2021)
+        Sc                  :
+        t0                  : initial time
     """
     def __init__(self, disc,
-                 diffusion=False, radial_drift=False, viscous_evo=True,
-                 evaporation=False, settling=False, advection=True, mhd_massloss = True, alpha_DW = 1e-3, leverarm = 3, xi = 1,
-                 Sc = 1, t0=0):
+                 diffusion = False, radial_drift = False, viscous_evo = True, int_photoevaporation = True,
+                 ext_photoevaporation = False, settling = False, advection = True, mhd_massloss = True, 
+                 mdot_photoev = 1e-9, L_x = 0, alpha_DW = 1e-3, leverarm = 3, xi = 1, Sc = 1, t0 = 0):
 
         self._disc = disc
         
@@ -49,7 +51,7 @@ class DustDynamicsModel(object):
             bound = 'Zero'
             # Power law extrapolation fails with zero-density, use simple
             # boundary condition instead
-            if evaporation: 
+            if ext_photoevaporation: 
                 bound = 'Zero'
             
             self._visc = ViscousEvolution(boundary=bound)
@@ -66,9 +68,13 @@ class DustDynamicsModel(object):
         else:
             self._diffusion = diffusion
 
-        self._evaporation = False
-        if evaporation:
-            self._evaporation = evaporation
+        self._int_photoevaporation = False
+        if int_photoevaporation:
+            self._int_photoevaporation = internal_photoev(disc)
+
+        self._ext_photoevaporation = False
+        if ext_photoevaporation:
+            self._ext_photoevaporation = ext_photoevaporation(grid, disc)
 
         self._advection = False
         if advection:
@@ -129,9 +135,13 @@ class DustDynamicsModel(object):
         except TypeError:
             pass
 
-        # Apply any photo-evaporation:
-        if self._evaporation:
-            self._evaporation(disc, dt)
+        # Internal photoevaporation
+        if self._int_photoevaporation:
+            self._int_photoevaporation(disc, dt)
+
+        # External photoevaporation:
+        if self._ext_photoevaporation:
+            self._ext_photoevaporation(disc, dt)
 
         # MHD advection:
         if self._advection:
@@ -382,7 +392,7 @@ if __name__ == "__main__":
                             viscous_evo=True,
                             radial_drift=True,
                             diffusion=True,
-                            evaporation=FixedExternalEvaportation(Mdot=1e-8))
+                            ext_photoevaporation=FixedExternalEvaportation(Mdot=1e-8))
 
 
     # Solve for the evolution

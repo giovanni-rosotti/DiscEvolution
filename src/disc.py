@@ -13,10 +13,12 @@ from .constants import AU, sig_H2, m_H
 
 class AccretionDisc(object):
 
-    def __init__(self, grid, star, eos, Sigma=None):
+    def __init__(self, grid, star, eos, Sigma=None, mdot_photoev = 0, L_x = 0):
         self._grid = grid
         self._star = star
         self._eos  = eos
+        self._mdot_photoev = mdot_photoev
+        self._L_x = L_x
         if Sigma is None:
             Sigma = np.zeros_like(self.R)
         self._Sigma = Sigma
@@ -122,6 +124,14 @@ class AccretionDisc(object):
     @property
     def amax(self):
         return 0
+
+    @property
+    def mdot_photoev(self):
+        return self._mdot_photoev
+
+    @property
+    def L_x(self):
+        return self._L_x
 
     def discmass(self):
         """
