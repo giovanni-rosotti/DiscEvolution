@@ -3,7 +3,7 @@
 # Author: Alice Somigliana
 # Date : June 9th, 2022
 #
-# Computes the mass loss term in the MHD scenario. Based on Giovanni Rosotti's Spock code. 
+# Computes the mass loss term for internal photoevaporation following Owen et al. (2012). Based on Giovanni Rosotti's Spock code. 
 ################################################################################
 from __future__ import print_function
 
