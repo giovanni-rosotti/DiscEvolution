@@ -129,6 +129,12 @@ class internal_photoev():
         sigmadot = self.Sigmadot(disc)
         Sigma_new = disc.Sigma - dt * sigmadot
 
+        # Check that the surface density never becomes negative
+
+        for i in range(0, len(Sigma_new)-1):
+            if Sigma_new[i] < 0:
+                Sigma_new[i] = self._floor_density
+
         disc.Sigma[:] = Sigma_new
 
         disc.Sigma[0] = disc.Sigma[1]
