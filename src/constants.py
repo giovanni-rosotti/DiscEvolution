@@ -33,3 +33,4 @@ sig_SB = 5.6704e-5
 m_H = 1.6737e-24
 sig_H2 = 2e-15
 GasConst = 8.314472e7
+mu_ion = 1.35
