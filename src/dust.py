@@ -558,7 +558,7 @@ class Advection(object):
         alpha_DW    : alpha disc wind parameter (Tabone et al. 2021)
     """
 
-    def __init__(self, advection=True, alpha_DW = 1e-3):
+    def __init__(self, advection = True, alpha_DW = 1e-3):
 
         self._advection = advection
         self._alpha_DW = alpha_DW
@@ -646,6 +646,9 @@ class Advection(object):
         mdotouter = f[-1]*2*np.pi
         
         return mdot, mdotouter
+
+    def tacc_0(self):
+        return self._tacc0
 
 
     

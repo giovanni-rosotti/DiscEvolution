@@ -18,18 +18,19 @@ class internal_photoev():
     Compute the photoevaporative mass loss term following Owen et al. (2012)
     """
 
-    def __init__(self, disc):
+    def __init__(self, disc, flag_dispersion):
 
         self._grid = disc.grid
         self._radius = self._grid.Rc
         self._sigma = disc.Sigma
+        self._flag_dispersion = flag_dispersion
 
         self._floor_density = 1e-20                                # Floor density in g cm^-2
 
         if disc._mdot_photoev != 0:
             self.mdot_X = disc._mdot_photoev
         else:
-            self.mdot_X = 6.25e-9 * (disc._star.M)**(-0.068)*(disc._L_x)**(1.14)
+            self.mdot_X = 6.25e-9 * (disc._star.M)**(-0.068)*(disc._L_x)**(1.14) #resta costante Lx/Lsta - deve cambaire nel tempo + deve essere sotto star, non disc
 
         self.norm_X = 1.299931298429752e-07  # Normalization factor obtained via numerical integration - \int 2 \pi x \Sigma(x) dx * au**2/Msun
         self.x = 0.85*(self._radius)*(disc._star.M)**(-1.)
@@ -102,8 +103,9 @@ class internal_photoev():
                 after_hole = self.y >0
 
                 if not any(after_hole):
+                    self._flag_dispersion = True
                     print('The hole is too large now - I will stop the evolution')
-                    sys.exit()
+                    return 'break'
 
                 y_cut = self.y[after_hole]
                 
@@ -131,6 +133,10 @@ class internal_photoev():
     def __call__(self, disc, dt):
 
         sigmadot = self.Sigmadot(disc)
+
+        if type(sigmadot[0]) == str:
+            return 'break'
+
         Sigma_new = disc.Sigma - dt * sigmadot
 
         # Check that the surface density never becomes negative
@@ -141,3 +147,7 @@ class internal_photoev():
 
         disc.Sigma[0] = disc.Sigma[1]
         disc.Sigma[-1] = disc.Sigma[-2]
+
+    @staticmethod
+    def return_flag_dispersion(self):
+        return self._flag_dispersion

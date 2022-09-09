@@ -42,10 +42,11 @@ class DustDynamicsModel(object):
     def __init__(self, disc,
                  diffusion = False, radial_drift = False, viscous_evo = True, int_photoevaporation = True,
                  ext_photoevaporation = False, settling = False, advection = True, mhd_massloss = True, 
-                 alpha = 1e-3, mdot_photoev = 1e-9, L_x = 0, alpha_DW = 1e-3, leverarm = 3, xi = 1, Sc = 1, t0 = 0):
+                 alpha = 1e-3, mdot_photoev = 1e-9, L_x = 0, flag_dispersion = False, alpha_DW = 1e-3, leverarm = 3, xi = 1, Sc = 1, t0 = 0):
 
         self._disc = disc
         self._alpha = alpha
+        self._flag_dispersion = flag_dispersion
         
         self._visc = None
         if viscous_evo:
@@ -72,7 +73,9 @@ class DustDynamicsModel(object):
 
         self._int_photoevaporation = False
         if int_photoevaporation:
-            self._int_photoevaporation = internal_photoev(disc)
+            self._int_photoevaporation = internal_photoev(disc, flag_dispersion)
+            if type(self._int_photoevaporation) == str:
+                return 'break'
 
         self._ext_photoevaporation = False
         if ext_photoevaporation:
@@ -141,6 +144,8 @@ class DustDynamicsModel(object):
         if self._int_photoevaporation:
             self._int_photoevaporation(disc, dt)
 
+            self._flag_dispersion = self._int_photoevaporation.return_flag_dispersion(self._int_photoevaporation)
+
         # External photoevaporation:
         if self._ext_photoevaporation:
             self._ext_photoevaporation(disc, dt)
@@ -159,7 +164,7 @@ class DustDynamicsModel(object):
         disc.update(dt)
 
         self._t += dt
-        return mdot,mdotouter
+        return mdot, mdotouter, self._flag_dispersion
 
     @property
     def disc(self):
@@ -168,6 +173,10 @@ class DustDynamicsModel(object):
     @property
     def t(self):
         return self._t    
+
+    @property
+    def flag_dispersion(self):
+        return self._flag_dispersion
 
     def dump(self, filename):
         '''Write the current state to a file, including header information'''
