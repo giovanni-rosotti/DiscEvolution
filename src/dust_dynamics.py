@@ -44,6 +44,7 @@ class DustDynamicsModel(object):
                  mdot_photoev = 1e-9, L_x = 0, alpha_DW = 1e-3, leverarm = 3, xi = 1, Sc = 1, t0 = 0):
 
         self._disc = disc
+        self._flag_dispersion = False
         
         self._visc = None
         if viscous_evo:
@@ -70,7 +71,7 @@ class DustDynamicsModel(object):
 
         self._int_photoevaporation = False
         if int_photoevaporation:
-            self._int_photoevaporation = internal_photoev(disc)
+            self._int_photoevaporation= internal_photoev(disc)
 
         self._ext_photoevaporation = False
         if ext_photoevaporation:
@@ -111,8 +112,8 @@ class DustDynamicsModel(object):
     
         # Do Advection-diffusion update
         if self._visc:
-            dust=None
-            size=None
+            dust = None
+            size = None
             try:
                 dust = disc.dust_frac
                 size = disc.grain_size
@@ -139,6 +140,8 @@ class DustDynamicsModel(object):
         if self._int_photoevaporation:
             self._int_photoevaporation(disc, dt)
 
+            self._flag_dispersion = self._int_photoevaporation.return_flag_dispersion(self._int_photoevaporation)
+
         # External photoevaporation:
         if self._ext_photoevaporation:
             self._ext_photoevaporation(disc, dt)
@@ -157,7 +160,7 @@ class DustDynamicsModel(object):
         disc.update(dt)
 
         self._t += dt
-        return mdot,mdotouter
+        return mdot, mdotouter, self._flag_dispersion
 
     @property
     def disc(self):
@@ -166,6 +169,10 @@ class DustDynamicsModel(object):
     @property
     def t(self):
         return self._t    
+
+    @property
+    def flag_dispersion(self):
+        return self._flag_dispersion
 
     def dump(self, filename):
         '''Write the current state to a file, including header information'''
@@ -444,6 +451,6 @@ if __name__ == "__main__":
 
             np.seterr(**err_state)
 
-        IO.pop_times(evo.t)
-            
+        IO.pop_times(evo.t)   
+ 
     plt.show()

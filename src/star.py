@@ -19,9 +19,10 @@ class StarBase(object):
         T_eff : effective temperature, K.    default = 5770
         age   : Stellar age, yr.             default = 0           
     '''
-    def __init__(self, M=1,R=1,T_eff=5770, age=0):
+    def __init__(self, M = 1, R = 1, L_x = 1, T_eff = 5770, age = 0):
         self._M    = M
         self._Rs   = R
+        self._L_x  = L_x
         self._Rau  = R*Rsun/AU
         self._Teff = T_eff
         self._age = age
@@ -55,7 +56,7 @@ class StarBase(object):
         '''
         return R * (M / (3*self._M))**(1/3.)
 
-    def evolve(self, age, M=None):
+    def evolve(self, age, M = None):
         '''Update the stellar properties based on current age and mass
         
         args:
@@ -64,7 +65,7 @@ class StarBase(object):
         '''
         raise AttributeError("StarBase::Evolve must be implemented in "
                              "class")
-        
+
     @property
     def Rs(self):
         '''Radius is Rsun'''
@@ -79,6 +80,11 @@ class StarBase(object):
     def M(self):
         '''Mass in Mun'''
         return self._M
+
+    @property
+    def L_x(self):
+        '''Mass in Mun'''
+        return self._L_x
 
     @property
     def T_eff(self):

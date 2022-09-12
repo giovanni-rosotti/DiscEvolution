@@ -8,6 +8,7 @@
 from __future__ import print_function
 
 import numpy as np
+import sys
 from scipy import integrate
 from .constants import *
 from .disc import AccretionDisc
@@ -34,7 +35,6 @@ class internal_photoev():
         self.x = 0.85*(self._radius)*(disc._star.M)**(-1.)
         self.index_null_photoevap = np.searchsorted(self.x, 2)
 
-
         a1 = 0.15138
         b1 = -1.2182
         c1 = 3.4046
@@ -55,7 +55,7 @@ class internal_photoev():
         x_photoev = self.x[where_photoevap]
 
         self._Sigmadot_Owen_unnorm[where_photoevap] = 10.**(a1*logx**6.+b1*logx**5.+c1*logx**4.+d1*logx**3.+e1*logx**2.+f1*logx+g1) * \
-                            ( 6.*a1*lnx**5./(x_photoev**2.*ln10**7.) + 5.*b1*lnx**4./(x_photoev**2.*ln10**6.)+4.*c1*lnx**3./(x_photoev**2.*ln10**5.) +   
+                            ( 6.*a1*lnx**5./(x_photoev**2.*ln10**7.) + 5.*b1*lnx**4./(x_photoev**2.*ln10**6.)+4.*c1*lnx**3./(x_photoev**2.*ln10**5.) + \
                             3.*d1*lnx**2./(x_photoev**2.*ln10**4.) + 2.*e1*lnx/(x_photoev**2. *ln10**3.) + f1/(x_photoev**2.*ln10**2.) ) * \
                             np.exp(-(x_photoev/100.)**10)
 
@@ -73,6 +73,7 @@ class internal_photoev():
         '''
 
         sigma_threshold = 1e22                                                  # Density threshold under which the hole is considered to be open
+        self._flag_dispersion = False
 
         # Checking whether the hole is open already
 
@@ -101,6 +102,11 @@ class internal_photoev():
                 
                 after_hole = self.y >0
 
+                if not any(after_hole):
+                    self._flag_dispersion = True
+                    print('The hole is too large now - I will stop the evolution')
+                    return 0, True
+
                 y_cut = self.y[after_hole]
                 
                 self._Sigmadot_Owen_hole = np.copy(self._Sigmadot_Owen)
@@ -119,14 +125,18 @@ class internal_photoev():
 
                 self._Sigmadot_Owen_hole[after_hole] *= - self.mdot_hole_X/norm
 
-                return self._Sigmadot_Owen
+                return self._Sigmadot_Owen, False
 
         else:
-            return self._Sigmadot_Owen
+            return self._Sigmadot_Owen, False
 
     def __call__(self, disc, dt):
 
-        sigmadot = self.Sigmadot(disc)
+        sigmadot, flag = self.Sigmadot(disc)
+
+        if flag:
+            return True
+
         Sigma_new = disc.Sigma - dt * sigmadot
 
         # Check that the surface density never becomes negative
@@ -137,3 +147,7 @@ class internal_photoev():
 
         disc.Sigma[0] = disc.Sigma[1]
         disc.Sigma[-1] = disc.Sigma[-2]
+
+    @staticmethod
+    def return_flag_dispersion(self):
+        return self._flag_dispersion
