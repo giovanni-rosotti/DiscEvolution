@@ -32,7 +32,6 @@ class DustDynamicsModel(object):
         setling             : whether to include dust settling (default = False)
         advection           : whether to include MHD advection (default = True)
         mhd_massloss        : whether to include MHD mass loss (default = True)
-        alpha               : alpha Shakura & Sunyaev parameter (Shakura & Sunyaev 1973)
         alpha_DW            : alpha disc wind parameter (Tabone et al. 2021)
         leverarm            : magnetic leverarm parameter (Tabone et al. 2021)
         xi                  : xi parameter (Tabone et al. 2021)
