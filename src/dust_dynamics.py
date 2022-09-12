@@ -42,10 +42,9 @@ class DustDynamicsModel(object):
     def __init__(self, disc,
                  diffusion = False, radial_drift = False, viscous_evo = True, int_photoevaporation = True,
                  ext_photoevaporation = False, settling = False, advection = True, mhd_massloss = True, 
-                 alpha = 1e-3, mdot_photoev = 1e-9, L_x = 0, alpha_DW = 1e-3, leverarm = 3, xi = 1, Sc = 1, t0 = 0):
+                 mdot_photoev = 1e-9, L_x = 0, alpha_DW = 1e-3, leverarm = 3, xi = 1, Sc = 1, t0 = 0):
 
         self._disc = disc
-        self._alpha = alpha
         self._flag_dispersion = False
         
         self._visc = None

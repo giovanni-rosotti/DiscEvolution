@@ -647,9 +647,6 @@ class Advection(object):
         
         return mdot, mdotouter
 
-    def tacc_0(self):
-        return self._tacc0
-
 
     
 if __name__ == "__main__":
