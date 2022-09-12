@@ -18,19 +18,18 @@ class internal_photoev():
     Compute the photoevaporative mass loss term following Owen et al. (2012)
     """
 
-    def __init__(self, disc, flag_dispersion):
+    def __init__(self, disc):
 
         self._grid = disc.grid
         self._radius = self._grid.Rc
         self._sigma = disc.Sigma
-        self._flag_dispersion = flag_dispersion
 
         self._floor_density = 1e-20                                # Floor density in g cm^-2
 
         if disc._mdot_photoev != 0:
             self.mdot_X = disc._mdot_photoev
         else:
-            self.mdot_X = 6.25e-9 * (disc._star.M)**(-0.068)*(disc._L_x)**(1.14) #resta costante Lx/Lsta - deve cambaire nel tempo + deve essere sotto star, non disc
+            self.mdot_X = 6.25e-9 * (disc._star.M)**(-0.068)*(disc._L_x)**(1.14)
 
         self.norm_X = 1.299931298429752e-07  # Normalization factor obtained via numerical integration - \int 2 \pi x \Sigma(x) dx * au**2/Msun
         self.x = 0.85*(self._radius)*(disc._star.M)**(-1.)
@@ -74,6 +73,7 @@ class internal_photoev():
         '''
 
         sigma_threshold = 1e22                                                  # Density threshold under which the hole is considered to be open
+        self._flag_dispersion = False
 
         # Checking whether the hole is open already
 
@@ -105,7 +105,7 @@ class internal_photoev():
                 if not any(after_hole):
                     self._flag_dispersion = True
                     print('The hole is too large now - I will stop the evolution')
-                    return 'break'
+                    return 0, True
 
                 y_cut = self.y[after_hole]
                 
@@ -125,17 +125,17 @@ class internal_photoev():
 
                 self._Sigmadot_Owen_hole[after_hole] *= - self.mdot_hole_X/norm
 
-                return self._Sigmadot_Owen
+                return self._Sigmadot_Owen, False
 
         else:
-            return self._Sigmadot_Owen
+            return self._Sigmadot_Owen, False
 
     def __call__(self, disc, dt):
 
-        sigmadot = self.Sigmadot(disc)
+        sigmadot, flag = self.Sigmadot(disc)
 
-        if type(sigmadot[0]) == str:
-            return 'break'
+        if flag:
+            return True
 
         Sigma_new = disc.Sigma - dt * sigmadot
 

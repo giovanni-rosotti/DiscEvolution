@@ -42,11 +42,11 @@ class DustDynamicsModel(object):
     def __init__(self, disc,
                  diffusion = False, radial_drift = False, viscous_evo = True, int_photoevaporation = True,
                  ext_photoevaporation = False, settling = False, advection = True, mhd_massloss = True, 
-                 alpha = 1e-3, mdot_photoev = 1e-9, L_x = 0, flag_dispersion = False, alpha_DW = 1e-3, leverarm = 3, xi = 1, Sc = 1, t0 = 0):
+                 alpha = 1e-3, mdot_photoev = 1e-9, L_x = 0, alpha_DW = 1e-3, leverarm = 3, xi = 1, Sc = 1, t0 = 0):
 
         self._disc = disc
         self._alpha = alpha
-        self._flag_dispersion = flag_dispersion
+        self._flag_dispersion = False
         
         self._visc = None
         if viscous_evo:
@@ -73,9 +73,7 @@ class DustDynamicsModel(object):
 
         self._int_photoevaporation = False
         if int_photoevaporation:
-            self._int_photoevaporation = internal_photoev(disc, flag_dispersion)
-            if type(self._int_photoevaporation) == str:
-                return 'break'
+            self._int_photoevaporation= internal_photoev(disc)
 
         self._ext_photoevaporation = False
         if ext_photoevaporation:
@@ -116,8 +114,8 @@ class DustDynamicsModel(object):
     
         # Do Advection-diffusion update
         if self._visc:
-            dust=None
-            size=None
+            dust = None
+            size = None
             try:
                 dust = disc.dust_frac
                 size = disc.grain_size
