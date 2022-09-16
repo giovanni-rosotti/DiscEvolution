@@ -145,9 +145,6 @@ class internal_photoev():
 
         disc.Sigma[:] = Sigma_new
 
-        disc.Sigma[0] = disc.Sigma[1]
-        disc.Sigma[-1] = disc.Sigma[-2]
-
     @staticmethod
     def return_flag_dispersion(self):
         return self._flag_dispersion

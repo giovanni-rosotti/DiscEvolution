@@ -31,7 +31,6 @@ class DustDynamicsModel(object):
         ext_photoevaporation: whether to include external photoevaporation (default = False)
         setling             : whether to include dust settling (default = False)
         advection           : whether to include MHD advection (default = True)
-        mhd_massloss        : whether to include MHD mass loss (default = True)
         alpha_DW            : alpha disc wind parameter (Tabone et al. 2021)
         leverarm            : magnetic leverarm parameter (Tabone et al. 2021)
         xi                  : xi parameter (Tabone et al. 2021)
@@ -41,7 +40,7 @@ class DustDynamicsModel(object):
     def __init__(self, disc,
                  diffusion = False, radial_drift = False, viscous_evo = True, int_photoevaporation = True,
                  ext_photoevaporation = False, settling = False, advection = True, mhd_massloss = True, 
-                 mdot_photoev = 1e-9, L_x = 0, alpha_DW = 1e-3, leverarm = 3, xi = 1, Sc = 1, t0 = 0):
+                 alpha_DW = 1e-3, leverarm = 3, xi = 1, Sc = 1, t0 = 0):
 
         self._disc = disc
         self._flag_dispersion = False
@@ -55,7 +54,7 @@ class DustDynamicsModel(object):
             if ext_photoevaporation: 
                 bound = 'Zero'
             
-            self._visc = ViscousEvolution(boundary=bound)
+            self._visc = ViscousEvolution(boundary = bound)
 
         self._diffusion = None
         if diffusion:
@@ -71,7 +70,7 @@ class DustDynamicsModel(object):
 
         self._int_photoevaporation = False
         if int_photoevaporation:
-            self._int_photoevaporation= internal_photoev(disc)
+            self._int_photoevaporation = internal_photoev(disc)
 
         self._ext_photoevaporation = False
         if ext_photoevaporation:
