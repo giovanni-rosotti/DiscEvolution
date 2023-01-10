@@ -147,8 +147,8 @@ class AccretionDisc(object):
     def update(self, dt):
         '''Update the disc properites and age'''
 
-        new_age = self._star._age + dt/(2*np.pi)
-        self._star.evolve(new_age)
+        new_age = self._star.age + dt/(2*np.pi)
+        self._star.evolve(dt/(2*np.pi))
         self._eos.update(dt, self.Sigma, self._star)
 
     def interp(self, R, data):
