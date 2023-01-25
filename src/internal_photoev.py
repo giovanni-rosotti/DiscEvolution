@@ -102,7 +102,7 @@ class internal_photoev():
                 
                 after_hole = self.y >0
 
-                if not any(after_hole):
+                if np.sum(after_hole)<2:
                     self._flag_dispersion = True
                     print('The hole is too large now - I will stop the evolution')
                     return 0, True
