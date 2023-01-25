@@ -1,2 +1,2 @@
-from .src.star import SimpleStar
+#from .src.star import SimpleStar
 #import .src.constants as constants

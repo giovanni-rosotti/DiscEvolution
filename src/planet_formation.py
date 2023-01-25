@@ -257,11 +257,11 @@ class PebbleAccretionHill(object):
         Sig_p /= Mearth / AU**2
         
         # Accretion rate in the limit Hp << rH
-        Mdot = 2*np.maximum(rH*rH, r_eff*r_eff) * Om_k*Sig_p
+        Mdot = 2*np.minimum(rH*rH, r_eff*r_eff) * Om_k*Sig_p
 
         # 3D correction for Hp >~ r_H:
         # Replaces Sigma_p -> np.pi * rho_p * r_eff
-        Mdot *= np.maximum(1, r_eff *(np.pi/8)**0.5 / Hp)
+        Mdot *= np.minimum(1, r_eff *(np.pi/8)**0.5 / Hp)
 
         return (Mp < self.M_iso(Rp)) * Mdot
 
@@ -391,7 +391,7 @@ class TypeIMigration(object):
         Q = 2*Xi/(3*h*h*h*Rp*Rp*Om_k)
         g_eff = self.gamma_eff_tab(Q)
         
-        q_h = (Mp*Mearth/(star.M*Msun)) / h
+        q_h = (Mp*Mearth/(star.mass*Msun)) / h
 
         jp = Om_k*Rp*Rp
         Om_kr_2 = jp*jp
@@ -502,7 +502,7 @@ class CridaMigration(object):
         vr_II = self._typeII.migration_rate(Rp, Mp)
 
         Me = Mp*Mearth/Msun
-        q = Me / star.M
+        q = Me / star.mass
         rH = star.r_Hill(Rp, Mp)
         nu = disc.interp(Rp, disc.nu)
         H  = disc.interp(Rp, disc.H)

@@ -135,6 +135,7 @@ class LBP_Solution(object):
 
         self._Sigma0 = M * (2-gamma) / (2 * np.pi * rc**2)
         self._gamma = gamma
+        self._flag_dispersion = False
         
     '''
     Analytical solution for the evolution of an accretion disc,
@@ -165,6 +166,9 @@ class LBP_Solution(object):
         ft = tt ** ((-2.5 + self._gamma)/(2-self._gamma))     # ft : commonly known as T^{-\eta}
         
         return self._Sigma0 * ft * Xg * np.exp( - Xg*X*X / tt)
+
+    def return_flag_dispersion(self):
+        return self._flag_dispersion
         
 #########################
 

@@ -29,10 +29,10 @@ class internal_photoev():
         if disc._mdot_photoev != 0:
             self.mdot_X = disc._mdot_photoev
         else:
-            self.mdot_X = 6.25e-9 * (disc._star.M)**(-0.068)*(disc._L_x)**(1.14)
+            self.mdot_X = 6.25e-9 * (disc._star.mass)**(-0.068)*(disc._L_x)**(1.14)
 
         self.norm_X = 1.299931298429752e-07  # Normalization factor obtained via numerical integration - \int 2 \pi x \Sigma(x) dx * au**2/Msun
-        self.x = 0.85*(self._radius)*(disc._star.M)**(-1.)
+        self.x = 0.85*(self._radius)*(disc._star.mass)**(-1.)
         self.index_null_photoevap = np.searchsorted(self.x, 2)
 
         a1 = 0.15138
@@ -60,7 +60,7 @@ class internal_photoev():
                             np.exp(-(x_photoev/100.)**10)
 
 
-        self._Sigmadot_Owen = self._Sigmadot_Owen_unnorm/self.norm_X*self.mdot_X*(disc._star.M)**(-2)   # Normalizing
+        self._Sigmadot_Owen = self._Sigmadot_Owen_unnorm/self.norm_X*self.mdot_X*(disc._star.mass)**(-2)   # Normalizing
         self._Sigmadot_Owen[self._Sigmadot_Owen < 0] = 0.                                         # Setting to zero every negative value - safety 
 
         self.hole = False
@@ -89,7 +89,7 @@ class internal_photoev():
 
         if self.hole:
 
-                self.y = 0.95 * (self._radius - self.rin_hole) * (disc._star.M)**(-1.) / AU
+                self.y = 0.95 * (self._radius - self.rin_hole) * (disc._star.mass)**(-1.) / AU
                         
                 a2 = -0.438226
                 b2 = -0.10658387
@@ -98,11 +98,11 @@ class internal_photoev():
                 e2 = -0.131809597
                 f2 = -1.32285709
 
-                self.mdot_hole_X = self.mdot_X * 0.768 * (disc._star.M)**(-0.08)              # Determining the mass-loss rate after the opening of the gap based on Owen et al. (2012) (equations B1 and B4)
+                self.mdot_hole_X = self.mdot_X * 0.768 * (disc._star.mass)**(-0.08)              # Determining the mass-loss rate after the opening of the gap based on Owen et al. (2012) (equations B1 and B4)
                 
                 after_hole = self.y >0
 
-                if not any(after_hole):
+                if np.sum(after_hole)<2:
                     self._flag_dispersion = True
                     print('The hole is too large now - I will stop the evolution')
                     return 0, True
@@ -116,10 +116,10 @@ class internal_photoev():
                     e2*f2*np.exp(f2*y_cut)/Rc_cut) * np.exp(-(y_cut/57.)**10.)
                 
                 norm_integral_1 = np.trapz(self._Sigmadot_Owen_hole[after_hole] * self._radius[after_hole], self._radius[after_hole])
-                norm_1 = norm_integral_1 * 2 * np.pi * disc._star.M**2 / (0.95)**2
+                norm_1 = norm_integral_1 * 2 * np.pi * disc._star.mass**2 / (0.95)**2
 
                 norm_integral_2 = np.trapz(self._Sigmadot_Owen_hole[after_hole], self._radius[after_hole])
-                norm_2 = norm_integral_2 * 2 * np.pi * disc._star.M * self._radius[index_hole] / 0.95 
+                norm_2 = norm_integral_2 * 2 * np.pi * disc._star.mass * self._radius[index_hole] / 0.95 
 
                 norm = (norm_1 + norm_2)*AU**2/Msun
 
