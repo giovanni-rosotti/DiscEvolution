@@ -34,3 +34,7 @@ m_H = 1.6737e-24
 sig_H2 = 2e-15
 GasConst = 8.314472e7
 mu_ion = 1.35
+
+#needed for EUV photo-evaporation
+m_p_cgs = 1.66e-24
+sig_h_atomar = 6.3e-18 #cgs units; cross section of atomic hydrogen

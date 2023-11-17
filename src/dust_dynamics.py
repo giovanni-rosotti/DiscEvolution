@@ -39,6 +39,7 @@ class DustDynamicsModel(object):
     """
     def __init__(self, disc,
                  diffusion = False, radial_drift = False, viscous_evo = True, int_photoevaporation = True,
+                 mdot_photoev_profile = 'owen',
                  ext_photoevaporation = False, settling = False, advection = True, mhd_massloss = True, 
                  alpha_DW = 1e-3, leverarm = 3, xi = 1, Sc = 1, t0 = 0):
 
@@ -70,7 +71,7 @@ class DustDynamicsModel(object):
 
         self._int_photoevaporation = False
         if int_photoevaporation:
-            self._int_photoevaporation = internal_photoev(disc)
+            self._int_photoevaporation = internal_photoev(disc, mdot_photoev_profile)
 
         self._ext_photoevaporation = False
         if ext_photoevaporation:
