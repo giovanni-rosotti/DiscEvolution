@@ -68,6 +68,41 @@ class internal_photoev():
 
             self.hole = False
 
+        elif mdot_photoev_profile=="picogna":
+            self.mdot_X = disc._mdot_photoev
+
+            mstars=np.array([0.1,0.3,0.5,1.0])
+            a_mstar=np.array([-3.8337,-1.3206,-1.2320,-0.6344])
+            b_mstar=np.array([22.91,13.0475,10.8505,6.3587])
+            c_mstar=np.array([-55.1282,-53.6990,-38.6939,-26.1445])
+            d_mstar=np.array([67.8919,117.6027,71.2489,56.4477])
+            e_mstar=np.array([-45.0138,-144.3769,-71.4279,-67.7403,])
+            f_mstar=np.array([16.2977,94.7854,37.8707,43.9212])
+            g_mstar=np.array([-3.5426,-26.7363,-9.3508,-13.2316])
+
+            mstar = disc._star.M
+            a=np.interp(mstar,mstars,a_mstar)
+            b=np.interp(mstar,mstars,b_mstar)
+            c=np.interp(mstar,mstars,c_mstar)
+            d=np.interp(mstar,mstars,d_mstar)
+            e=np.interp(mstar,mstars,e_mstar)
+            f=np.interp(mstar,mstars,f_mstar)
+            g=np.interp(mstar,mstars,g_mstar)
+
+            x=self._radius
+            lnx=np.log(x)
+            ln10=np.log(10.)
+            self._Sigmadot_Picogna = ( 6.*a*lnx**5./(x*ln10**6.) + 5.*b*lnx**4./(x*ln10**5.)+4.*c*lnx**3./(x*ln10**4.) + \
+                                3.*d*lnx**2./(x*ln10**3.) + 2.*e*lnx/(x *ln10**2.) + f/(x*ln10) ) / x
+            
+            self._Sigmadot_Picogna *= 10.**(a*lnx**6.+b*lnx**5.+c*lnx**4.+d*lnx**3.+e*lnx**2.+f*lnx+g)
+
+            #normalise profile
+            norm = np.trapz(2*np.pi*x*AU*self._Sigmadot_Picogna,x*AU)
+            self._Sigmadot_Picogna *= self.mdot_X*Msun/yr/norm
+
+
+
         elif mdot_photoev_profile=="alexander":
             alpha_b  = 2.6e-13  # recombination coefficient of atomic hydrogen
             self.sigcrit=1e-5
@@ -170,6 +205,10 @@ class internal_photoev():
             else:
 
                 return self._Sigmadot_Owen, False
+            
+        elif self.mdot_photoev_profile=="picogna":
+            return self._Sigmadot_Picogna, False
+        
         elif self.mdot_photoev_profile=="alexander":
             self._flag_dispersion = False
             isdirect= (disc.Sigma[self.ir_01] < self.sigcrit and disc.Sigma[self.ir_1] < self.sigcrit)
